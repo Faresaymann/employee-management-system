@@ -105,13 +105,15 @@ export default function FullPageEmployeeList() {
  function AddNewEmployee() {
     navigate('/add-employee');
  }
- // Update employee inline (prompt)
- function UpdateEmployee() {
-    navigate('/update-employee');
+
+ // Update employee 
+ function UpdateEmployee(id) {
+    navigate(`/edit-employee/${id}`);
  }
- // Delete employee inline (confirm)
- function DeleteEmployee() {
-    navigate('/delete-employee');
+
+ // Delete employee 
+ function DeleteEmployee(id) {
+    navigate(`/delete-employee/${id}`);
  }
 
   
@@ -311,13 +313,14 @@ export default function FullPageEmployeeList() {
                       <td className="role-cell">{emp.lastName}</td>
                       <td>{emp.email && emp.email !== '—' ? <a className="email-link" href={`mailto:${emp.email}`}>{emp.email}</a> : <span className="text-muted">No email</span>}</td>
                       <td className="actions-td">
-                        <button className="btn-emp btn-update" onClick={() => handleUpdate(emp)} aria-label={`Update ${emp.firstName}`}>
+                        {/* Update  button  */}
+                        <button className="btn-emp btn-update" onClick={() => UpdateEmployee(emp.id)} aria-label={`Update ${emp.firstName}`}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
                             <path d="M3 21v-3.75L14.06 6.19a2 2 0 0 1 2.82 0l1.94 1.94a2 2 0 0 1 0 2.82L7.75 22H3z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                           Edit
                         </button>
-
+                        {/* Delete button */}
                         <button className="btn-emp btn-delete" onClick={() => handleDelete(emp)} aria-label={`Delete ${emp.firstName}`}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
                             <path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />

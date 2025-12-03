@@ -13,8 +13,8 @@ function App() {
         <Route path='/employees' element={<ListEmployeeComponent />} />
          {/* // http://localhost:3000/add-employee */}
         <Route path='/add-employee' element={<EmployeeComponent />} />  
-          {/* // http://localhost:3000/update-employee */}
-        <Route path='/update-employee' element={<EmployeeComponent />} />
+          {/* // http://localhost:3000/edit-employee */}
+        <Route path='/edit-employee/:id'  element={<EmployeeComponent />} />
           {/* // http://localhost:3000/delete-employee */} 
         <Route path='/delete-employee' element={<EmployeeComponent />} />
       </Routes>

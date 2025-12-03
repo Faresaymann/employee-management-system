@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createEmployee } from '../Services/EmployeeService'; // your service: named export
+import React, { use, useEffect, useState } from 'react';
+import { useNavigate ,useParams } from 'react-router-dom';
+import { createEmployee, updateEmployee } from '../Services/EmployeeService'; // your service: named export
+import { getEmployeeById as getEmployee } from '../Services/EmployeeService';
 
 // Reusable inline logo 
 const EmpTrackLogo = ({ size = 56 }) => (
@@ -19,28 +20,53 @@ const EmpTrackLogo = ({ size = 56 }) => (
 
 //add employee form component
 export default function AddEmployeeForm({ onSubmit }) {
-  const navigate = useNavigate();
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+
+  const [firstname, setfirstname] = useState('');
+  const [lastname, setlastname] = useState('');
   const [email, setemail] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
- const [errors, setErrors] = useState({
+  const { id } = useParams();
+
+  const [errors, setErrors] = useState({
     firstname: '',
     lastname: '',
     email: '' 
   });
-  
+
+  const navigate = useNavigate();
+
+//Fetch employee by ID and populate form (for edit)
+useEffect(() => {
+    //log the id to verify
+    console.log("ID FROM PARAM:", id); 
+    if (id) {
+        getEmployee(id)
+            .then((response) => {
+                const emp = response.data;
+                setfirstname(emp.firstname);
+                setlastname(emp.lastname);
+                setemail(emp.email);
+            })
+            .catch((error) => {
+                console.error('Failed to fetch employee data:', error);
+            });
+    }
+}, [id]);
+
+
+
+
   // Form validation (checks if all fields are filled)
  function validateForm() {
   let valid = true;
   const errorsCopy = { ...errors };
 
-  if (firstName.trim()) errorsCopy.firstname = '';
+  if (firstname.trim()) errorsCopy.firstname = '';
   else { errorsCopy.firstname = 'First name is required.'; valid = false; }
 
-  if (lastName.trim()) errorsCopy.lastname = '';
+  if (lastname.trim()) errorsCopy.lastname = '';
   else { errorsCopy.lastname = 'Last name is required.'; valid = false; }
 
   if (email.trim()) errorsCopy.email = '';
@@ -50,29 +76,58 @@ export default function AddEmployeeForm({ onSubmit }) {
   return valid;
 }
 
-  // Handle form submission 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (validateForm()) {
-    const employee = {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      email: email.trim()
-    };
-    setSubmitting(true);
-    try {
-      const res = await createEmployee(employee);
-      if (onSubmit) onSubmit(res.data);
-      navigate('/employees');
-    } catch (err) {
-      console.error('Failed to create employee:', err);
-      const msg = err?.response?.data?.message || err.message || 'Failed to add employee';
-      alert(msg);
-    } finally {
-      setSubmitting(false);
+  // Handle form submission (add or update)
+  const SaveOrUpdateEmployee = async (e) => {
+    e.preventDefault();
+    if (validateForm()) {
+        const employee = {firstname: firstname.trim(),lastname: lastname.trim(),email: email.trim()};
+
+        if (id) {
+            updateEmployee(id, employee).then((res) =>{
+                console.log('Employee updated:', res.data);
+                navigate('/employees');
+            }).catch((err) => {
+                console.error('Failed to update employee:', err);
+                const msg = err?.response?.data?.message || err.message || 'Failed to update employee';
+                alert(msg);
+            });
+        }else {  setSubmitting(true);
+            try {
+                const res = await createEmployee(employee);
+            if (onSubmit) onSubmit(res.data);
+                navigate('/employees');
+            } catch (err) {
+                console.error('Failed to create employee:', err);
+                const msg = err?.response?.data?.message || err.message || 'Failed to add employee';
+                alert(msg);
+            } finally {
+            setSubmitting(false);
+            }
+        }
     }
-  }
+       
 };
+
+// Dynamic page title based on add or edit
+function pageTitle() {
+    if (id) {
+        return <h1 className="display-3">Edit Employee</h1>;
+    }
+    else {
+        return <h1 className="display-3">Add New Employee</h1>;
+    }
+} 
+
+// Dynamic button text based on add or edit
+function changeButtonText() {
+    if (id) {
+        return  <button type="submit" className="btn-submit" disabled={submitting}>{submitting ? 'Updating…' : 'Update Employee'}</button>
+    } else {
+        return <button type="submit" className="btn-submit" disabled={submitting}>{submitting ? 'Adding…' : 'Add Employee'}</button>;
+    }
+}
+
+
 
   return (
     <>
@@ -199,7 +254,10 @@ export default function AddEmployeeForm({ onSubmit }) {
           <header className="employee-header">
             <EmpTrackLogo size={48} />
             <div className="title-wrap">
-              <h1 className="display-3">Add New Employee</h1>
+                {/* //change the title based on add or edit */}
+                {
+                pageTitle()
+                }
               <div className="subtitle">Fill in employee details</div>
             </div>
 
@@ -208,18 +266,18 @@ export default function AddEmployeeForm({ onSubmit }) {
             </div>
           </header>
 
-          <form className="form-area" onSubmit={handleSubmit}>
+          <form className="form-area" onSubmit={SaveOrUpdateEmployee}>
             <div className="row">
-                {/* first name input part    */}
+                {/* first name input part */}
               <div>
                 <label htmlFor="first">First Name</label>
                 <input
                         id="first"
                         type="text"
                         placeholder="Enter first name"
-                        value={firstName}
+                        value={firstname}
                         className={`form-control ${errors.firstname ? 'is-invalid' : ''}`} 
-                        onChange={e => setFirstName(e.target.value)}
+                        onChange={e => setfirstname(e.target.value)}
                         disabled={submitting}
                         />
                         {errors.firstname && (
@@ -233,9 +291,9 @@ export default function AddEmployeeForm({ onSubmit }) {
                   id="last"
                   type="text"
                   placeholder="Enter last name"
-                  value={lastName}
+                  value={lastname}
                   className={`form-control ${errors.lastname ? 'is-invalid' : ''}`} 
-                  onChange={e => setLastName(e.target.value)}
+                  onChange={e => setlastname(e.target.value)}
                   disabled={submitting}
                 />
                 {errors.lastname && (
@@ -261,7 +319,9 @@ export default function AddEmployeeForm({ onSubmit }) {
             </div>
 
             <div className="form-actions">
-              <button type="submit" className="btn-submit" disabled={submitting}>{submitting ? 'Adding…' : 'Add Employee'}</button>
+              {
+                changeButtonText()
+              }
               <button type="button" className="btn-cancel" onClick={() => navigate('/employees')} disabled={submitting}>Cancel</button>
             </div>
           </form>
