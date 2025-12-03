@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { listEmployees } from '../Services/EmployeeService'; // adjust if you use default export
-
+import { useNavigate } from 'react-router-dom';
 // Simple inline SVG logo component — replace if you have an actual logo
 const EmpTrackLogo = ({ size = 56 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
@@ -21,6 +21,9 @@ export default function FullPageEmployeeList() {
   const [employees, setEmployees] = useState([]);
   const [normalized, setNormalized] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  //for Add / Update / Delete actions
+  const navigate = useNavigate();
 
   const pick = (...cands) => {
     for (const c of cands) if (c !== undefined && c !== null && c !== '') return c;
@@ -97,33 +100,21 @@ export default function FullPageEmployeeList() {
   }, []);
 
   /* ---------- Local UI handlers for Add / Update / Delete ---------- */
-  const handleAdd = () => {
-    // simple prompt-based add (replace with modal/form for production)
-    const firstName = prompt('First name:')?.trim();
-    if (!firstName) return;
-    const lastName = prompt('Last name:')?.trim() ?? '';
-    const email = prompt('Email:')?.trim() ?? '';
+  
+// Navigate to add-employee page
+ function AddNewEmployee() {
+    navigate('/add-employee');
+ }
+ // Update employee inline (prompt)
+ function UpdateEmployee() {
+    navigate('/update-employee');
+ }
+ // Delete employee inline (confirm)
+ function DeleteEmployee() {
+    navigate('/delete-employee');
+ }
 
-    const newEmp = { id: Math.random().toString(36).slice(2, 9), firstName, lastName, email: email || '—' };
-    setNormalized(prev => [newEmp, ...prev]);
-  };
-
-  const handleUpdate = (emp) => {
-    // prompt to edit existing employee (replace with modal/form for production)
-    const firstName = prompt('Edit first name:', emp.firstName);
-    if (firstName === null) return; // user cancelled
-    const lastName = prompt('Edit last name:', emp.lastName);
-    if (lastName === null) return;
-    const email = prompt('Edit email:', emp.email === '—' ? '' : emp.email);
-    if (email === null) return;
-
-    setNormalized(prev => prev.map(e => e.id === emp.id ? { ...e, firstName: firstName.trim() || '—', lastName: lastName.trim() || '—', email: email.trim() || '—' } : e));
-  };
-
-  const handleDelete = (emp) => {
-    if (!window.confirm(`Delete ${emp.firstName} ${emp.lastName}?`)) return;
-    setNormalized(prev => prev.filter(e => e.id !== emp.id));
-  };
+  
 
   return (
     <>
@@ -285,7 +276,7 @@ export default function FullPageEmployeeList() {
             </div>
 
             <div className="header-actions">
-              <button className="btn-emp btn-add" onClick={handleAdd} aria-label="Add employee">
+              <button className="btn-emp btn-add" onClick={AddNewEmployee} aria-label="Add employee">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
                   <path d="M12 5v14M5 12h14" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
