@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { listEmployees } from '../Services/EmployeeService'; // adjust if you use default export
 import { useNavigate } from 'react-router-dom';
+import { deleteEmployee } from '../Services/EmployeeService';
 // Simple inline SVG logo component — replace if you have an actual logo
 const EmpTrackLogo = ({ size = 56 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
@@ -112,11 +113,17 @@ export default function FullPageEmployeeList() {
  }
 
  // Delete employee 
- function DeleteEmployee(id) {
-    navigate(`/delete-employee/${id}`);
- }
+  function DeleteEmployee(id) {
+    console.log("Deleting employee id:", id);
+    deleteEmployee(id)
+      .then(() => listEmployees())
+      .then((res) => {
+          setEmployees(res.data); // raw array
+          setNormalized(res.data.map(normalizeEmployee)); // normalized array
+      })
+      .catch((err) => console.error("Delete error:", err));
+}
 
-  
 
   return (
     <>
@@ -321,7 +328,7 @@ export default function FullPageEmployeeList() {
                           Edit
                         </button>
                         {/* Delete button */}
-                        <button className="btn-emp btn-delete" onClick={() => handleDelete(emp)} aria-label={`Delete ${emp.firstName}`}>
+                        <button className="btn-emp btn-delete" onClick={() => DeleteEmployee(emp.id)} aria-label={`Delete ${emp.firstName}`}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
                             <path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
