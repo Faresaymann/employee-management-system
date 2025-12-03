@@ -106,6 +106,18 @@ Frontend will run on `http://localhost:3000`.
 - **Backend:** Spring Boot, Spring Data JPA, MySQL, Hibernate  
 - **Build Tools:** Maven/Gradle, npm/yarn
 
+## Screenshots
+
+### Employee List
+![Employee List](images/employee-list.png)
+
+### Add Employee
+![Add Employee](images/add-employee.png)
+
+### Update Employee
+![Update Employee](images/update-employee.png)
+
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
