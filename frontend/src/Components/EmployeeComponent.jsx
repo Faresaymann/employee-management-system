@@ -33,60 +33,46 @@ export default function AddEmployeeForm({ onSubmit }) {
   });
   
   // Form validation (checks if all fields are filled)
-  function validateForm() {
-    let valid = true;
-    const errorsCopy = { ...errors };
+ function validateForm() {
+  let valid = true;
+  const errorsCopy = { ...errors };
 
-    if (firstName.trim()) {    
-        errorsCopy.firstname = ''; 
-    }else {
-        errorsCopy.firstname = 'First name is required.';
-        valid = false;
-    }
+  if (firstName.trim()) errorsCopy.firstname = '';
+  else { errorsCopy.firstname = 'First name is required.'; valid = false; }
 
-    if (lastName.trim()) {    
-        errorsCopy.lastname = ''; 
-    }else {
-        errorsCopy.lastname = 'Last name is required.';
-        valid = false;
-    }
-    
-    if (email.trim()) {    
-        errorsCopy.email = ''; 
-    }else {
-        errorsCopy.email = 'Email is required.';
-        valid = false;
-    }
-    setErrors(errorsCopy);
-    return valid;
+  if (lastName.trim()) errorsCopy.lastname = '';
+  else { errorsCopy.lastname = 'Last name is required.'; valid = false; }
+
+  if (email.trim()) errorsCopy.email = '';
+  else { errorsCopy.email = 'Email is required.'; valid = false; }
+
+  setErrors(errorsCopy);
+  return valid;
 }
-
 
   // Handle form submission 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!firstName.trim()) return alert('First name is required');
-    if (!email.trim()) return alert('Email is required');
-
+  e.preventDefault();
+  if (validateForm()) {
     const employee = {
-      firstname: firstName.trim(),
-      lastname: lastName.trim(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       email: email.trim()
     };
-
     setSubmitting(true);
     try {
       const res = await createEmployee(employee);
       if (onSubmit) onSubmit(res.data);
-      // navigate back to the employees list
       navigate('/employees');
     } catch (err) {
       console.error('Failed to create employee:', err);
       const msg = err?.response?.data?.message || err.message || 'Failed to add employee';
+      alert(msg);
     } finally {
       setSubmitting(false);
     }
-  };
+  }
+};
 
   return (
     <>
@@ -224,19 +210,23 @@ export default function AddEmployeeForm({ onSubmit }) {
 
           <form className="form-area" onSubmit={handleSubmit}>
             <div className="row">
+                {/* first name input part    */}
               <div>
                 <label htmlFor="first">First Name</label>
                 <input
-                  id="first"
-                  type="text"
-                  placeholder="Enter first name"
-                  value={firstName}
-                  onChange={e => setFirstName(e.target.value)}
-                  required
-                  disabled={submitting}
-                />
+                        id="first"
+                        type="text"
+                        placeholder="Enter first name"
+                        value={firstName}
+                        className={`form-control ${errors.firstname ? 'is-invalid' : ''}`} 
+                        onChange={e => setFirstName(e.target.value)}
+                        disabled={submitting}
+                        />
+                        {errors.firstname && (
+                        <div className="invalid-feedback">{errors.firstname}</div> 
+                        )}
               </div>
-
+                {/* last name input part    */}
               <div>
                 <label htmlFor="last">Last Name</label>
                 <input
@@ -244,12 +234,16 @@ export default function AddEmployeeForm({ onSubmit }) {
                   type="text"
                   placeholder="Enter last name"
                   value={lastName}
+                  className={`form-control ${errors.lastname ? 'is-invalid' : ''}`} 
                   onChange={e => setLastName(e.target.value)}
                   disabled={submitting}
                 />
+                {errors.lastname && (
+                  <div className="invalid-feedback">{errors.lastname}</div>
+                )}
               </div>
             </div>
-
+             {/* email input part    */}
             <div>
               <label htmlFor="email">Email</label>
               <input
@@ -257,10 +251,13 @@ export default function AddEmployeeForm({ onSubmit }) {
                 type="email"
                 placeholder="name@company.com"
                 value={email}
+                className={`form-control ${errors.email ? 'is-invalid' : ''}`}
                 onChange={e => setemail(e.target.value)}
-                required
                 disabled={submitting}
               />
+                {errors.email && (
+                  <div className="invalid-feedback">{errors.email}</div>
+                )}
             </div>
 
             <div className="form-actions">
